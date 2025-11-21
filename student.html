@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Student Menu Viewer — Foody</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+:root{
+  --glass-bg: rgba(255,255,255,0.08);
+  --accent-pink: #ff2b6e;
+  --accent-cyan: #29d9ff;
+  --glass-border: rgba(255,255,255,0.14);
+  --text-light: #fff;
+}
+
+*{ box-sizing: border-box; margin:0; padding:0; font-family:"Poppins",sans-serif; }
+
+body{
+  min-height:100vh;
+  background-color:#0b0b11;
+  color:var(--text-light);
+  position:relative;
+  overflow-x:hidden;
+}
+
+.foody-bg{
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(170deg, rgba(6,6,8,0.62), rgba(6,6,8,0.62)),
+    url("https://img.freepik.com/free-photo/top-view-circular-food-frame_23-2148723455.jpg");
+  background-size:cover;
+  background-position:center;
+  filter:saturate(1.05) contrast(1.02);
+  animation: slowFloat 18s ease-in-out infinite;
+  z-index:0;
+}
+
+@keyframes slowFloat{
+  0%{ transform:scale(1) translateY(0); }
+  50%{ transform:scale(1.02) translateY(-10px); }
+  100%{ transform:scale(1) translateY(0); }
+}
+
+.container{
+  position:relative;
+  z-index:2;
+  max-width:1200px;
+  margin:0 auto;
+  padding:20px;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:30px;
+}
+.header h1{ font-size:28px; font-weight:600; margin-bottom:10px; }
+.header p{ font-size:16px; opacity:0.85; }
+
+.global-search{
+  display:flex;
+  justify-content:center;
+  margin-bottom:20px;
+}
+.global-search input{
+  width:100%;
+  max-width:400px;
+  padding:12px;
+  border-radius:8px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.06);
+  color:var(--text-light);
+  outline:none;
+  font-size:16px;
+}
+
+.filters{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:15px;
+  margin-bottom:20px;
+  padding:15px;
+  background:var(--glass-bg);
+  backdrop-filter:blur(12px) saturate(120%);
+  border:1px solid var(--glass-border);
+  border-radius:12px;
+}
+.filters label{ font-size:14px; margin-right:5px; }
+.filters select, .filters input{
+  padding:8px;
+  border-radius:6px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.06);
+  color:var(--text-light);
+  outline:none;
+  font-size:14px;
+}
+.filters .veg-filter{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.filters .veg-filter input{ margin:0; }
+
+.menu-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+  gap:20px;
+}
+
+.item-card{
+  background:var(--glass-bg);
+  backdrop-filter:blur(12px) saturate(120%);
+  border:1px solid var(--glass-border);
+  border-radius:12px;
+  padding:15px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  position:relative;
+}
+
+.item-card h4{ font-size:16px; margin-bottom:5px; }
+.item-card p{ font-size:13px; opacity:0.8; margin-bottom:5px; }
+.item-card .price{ font-weight:600; color:var(--accent-cyan); }
+.item-card .vendor{ font-size:12px; opacity:0.7; margin-bottom:10px; }
+
+.veg-indicator{
+  display:inline-block;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  margin-right:5px;
+}
+.veg{ background:#4caf50; }
+.non-veg{ background:#f44336; }
+
+.msg{ text-align:center; margin-top:20px; font-size:14px; }
+.msg.error{ color:#ff8b8b; }
+
+.cart{
+  position:fixed;
+  right:20px;
+  top:100px;
+  background:var(--glass-bg);
+  backdrop-filter:blur(12px) saturate(120%);
+  border:1px solid var(--glass-border);
+  border-radius:12px;
+  padding:15px;
+  width:300px;
+  max-height:70%;
+  overflow-y:auto;
+  z-index:5;
+}
+
+.cart h3{ text-align:center; margin-bottom:10px; }
+.cart-item{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:6px;
+  font-size:14px;
+}
+.cart-item button{
+  background:#ff8b8b;
+  color:#fff;
+  border:none;
+  border-radius:4px;
+  padding:2px 6px;
+  cursor:pointer;
+}
+.cart-total{
+  text-align:right;
+  font-weight:600;
+  margin-top:10px;
+}
+.checkout-btn{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:var(--accent-pink);
+  color:#fff;
+  cursor:pointer;
+  font-weight:600;
+  margin-top:10px;
+}
+.checkout-btn:hover{
+  transform:scale(1.02);
+}
+.add-cart-btn{
+  padding:6px 12px;
+  border:none;
+  border-radius:6px;
+  background:var(--accent-cyan);
+  color:#000;
+  cursor:pointer;
+  font-weight:600;
+  margin-top:5px;
+}
+
+/* Additional menuContainer/cartContainer styles */
+#menuContainer div{ margin-bottom:10px; }
+#cartContainer{ margin-top:20px; }
+</style>
+</head>
+<body>
+
+<div class="foody-bg"></div>
+
+<div class="container">
+  <div class="header">
+    <h1>Student Menu Viewer</h1>
+    <p>Browse delicious food from campus vendors</p>
+  </div>
+
+  <div class="global-search">
+    <input type="text" id="globalSearchInput" placeholder="Search for dishes across all vendors...">
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters">
+    <div class="veg-filter">
+      <label>Veg/Non-Veg:</label>
+      <label><input type="checkbox" id="vegFilter" checked> Veg</label>
+      <label><input type="checkbox" id="nonVegFilter" checked> Non-Veg</label>
+    </div>
+    <div>
+      <label for="categoryFilter">Category:</label>
+      <select id="categoryFilter">
+        <option value="">All Categories</option>
+      </select>
+    </div>
+    <div>
+      <label for="vendorFilter">Vendor:</label>
+      <select id="vendorFilter">
+        <option value="">All Vendors</option>
+      </select>
+    </div>
+    <div>
+      <label>Price Range:</label>
+      <input type="number" id="minPrice" placeholder="Min ₹" min="0">
+      <input type="number" id="maxPrice" placeholder="Max ₹" min="0">
+    </div>
+  </div>
+
+  <!-- Existing menu grid -->
+  <div id="menuGrid" class="menu-grid"></div>
+  <div id="message" class="msg"></div>
+
+  <!-- Additional menu container from second code -->
+  <div id="menuContainer"></div>
+
+  <!-- Additional cart container from second code -->
+  <div id="cartContainer">
+    <h2>Cart</h2>
+    <ul id="cartList"></ul>
+  </div>
+</div>
+
+<!-- Cart Sidebar -->
+<div class="cart" id="cartDiv">
+  <h3>My Cart</h3>
+  <div id="cartItems"></div>
+  <div class="cart-total" id="cartTotal">Total: ₹0</div>
+  <button class="checkout-btn" onclick="checkout()">Checkout</button>
+</div>
+
+<!-- Firebase Scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<script>
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyBzICC4WWJbI6znrLfafWvg6vwdR_joRlI",
+  authDomain: "bruteforce96-433ed.firebaseapp.com",
+  databaseURL: "https://bruteforce96-433ed-default-rtdb.firebaseio.com",
+  projectId: "bruteforce96-433ed",
+  storageBucket: "bruteforce96-433ed.appspot.com",
+  messagingSenderId: "87702972088",
+  appId: "1:87702972088:web:2b5f391e7abb674d24764d",
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let allItems = [];
+let cart = [];
+let categories = new Set();
+let vendors = new Set();
+
+// Fetch all vendors' menu items
+db.ref('vendors').on('value', snapshot=>{
+  allItems = [];
+  categories.clear();
+  vendors.clear();
+  snapshot.forEach(vendorSnap=>{
+    const vendorData = vendorSnap.val();
+    const vendorName = vendorData.name || 'Vendor';
+    vendors.add(vendorName);
+    if(vendorData.menuItems){
+      Object.values(vendorData.menuItems).forEach(item=>{
+        allItems.push({...item, vendor: vendorSnap.key, vendorName});
+        if(item.category) categories.add(item.category);
+      });
+    }
+  });
+  populateFilters();
+  applyFilters();
+  updateCartDisplay();
+});
+
+// Populate filter dropdowns
+function populateFilters(){
+  const categorySelect = document.getElementById('categoryFilter');
+  categorySelect.innerHTML = '<option value="">All Categories</option>';
+  categories.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    categorySelect.appendChild(option);
+  });
+
+  const vendorSelect = document.getElementById('vendorFilter');
+  vendorSelect.innerHTML = '<option value="">All Vendors</option>';
+  vendors.forEach(ven => {
+    const option = document.createElement('option');
+    option.value = ven;
+    option.textContent = ven;
+    vendorSelect.appendChild(option);
+  });
+}
+
+// Apply filters and search
+function applyFilters(){
+  const query = document.getElementById('globalSearchInput').value.toLowerCase().trim();
+  const vegChecked = document.getElementById('vegFilter').checked;
+  const nonVegChecked = document.getElementById('nonVegFilter').checked;
+  const selectedCategory = document.getElementById('categoryFilter').value;
+  const selectedVendor = document.getElementById('vendorFilter').value;
+  const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+  const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+
+  const filtered = allItems.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(query) ||
+                          (item.vendorName && item.vendorName.toLowerCase().includes(query));
+    const matchesVeg = (vegChecked && (!item.vegType || item.vegType.toLowerCase() === 'veg')) ||
+                       (nonVegChecked && item.vegType && item.vegType.toLowerCase() === 'non-veg');
+    const matchesCategory = !selectedCategory || item.category === selectedCategory;
+    const matchesVendor = !selectedVendor || item.vendorName === selectedVendor;
+    const matchesPrice = item.price >= minPrice && item.price <= maxPrice;
+    return matchesSearch && matchesVeg && matchesCategory && matchesVendor && matchesPrice;
+  });
+  displayMenuItems(filtered);
+}
+
+// Display items in grid
+function displayMenuItems(items){
+  const grid = document.getElementById('menuGrid');
+  grid.innerHTML = '';
+  if(items.length===0){
+    grid.innerHTML = '<p>No menu items available.</p>';
+    return;
+  }
+  items.forEach(item=>{
+    const card = document.createElement('div');
+    card.className='item-card';
+    card.innerHTML=`
+      <div class="vendor">${item.vendorName}</div>
+      <h4>${item.name}</h4>
+      <p><span class="veg-indicator ${item.vegType ? item.vegType.toLowerCase():'veg'}"></span>${item.vegType || 'Veg'} | ${item.category||''}</p>
+      <p class="price">₹${item.price || 'N/A'}</p>
+      <button class="add-cart-btn" onclick='addToCart(${JSON.stringify(item)})'>+</button>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// Global search
+document.getElementById('globalSearchInput').addEventListener('input', applyFilters);
+
+// Filter event listeners
+document.getElementById('vegFilter').addEventListener('change', applyFilters);
+document.getElementById('nonVegFilter').addEventListener('change', applyFilters);
+document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+document.getElementById('vendorFilter').addEventListener('change', applyFilters);
+document.getElementById('minPrice').addEventListener('input', applyFilters);
+document.getElementById('maxPrice').addEventListener('input', applyFilters);
+
+// Cart functions for main cart sidebar
+function addToCart(item){
+  const existing = cart.find(ci=>ci.name===item.name && ci.vendor===item.vendor);
+  if(existing){ existing.quantity+=1; }
+  else{ cart.push({...item, quantity:1}); }
+  updateCartDisplay();
+}
+
+function removeFromCart(name,vendor){
+  cart = cart.filter(ci=>!(ci.name===name && ci.vendor===vendor));
+  updateCartDisplay();
+}
+
+function changeQuantity(name,vendor,delta){
+  const ci = cart.find(c=>c.name===name && c.vendor===vendor);
+  if(ci){
+    ci.quantity += delta;
+    if(ci.quantity<=0) removeFromCart(name,vendor);
+  }
+  updateCartDisplay();
+}
+
+function updateCartDisplay(){
+  const cartDiv = document.getElementById('cartItems');
+  cartDiv.innerHTML='';
+  let total =0;
+  cart.forEach(ci=>{
+    total += ci.price*ci.quantity;
+    const div=document.createElement('div');
+    div.className='cart-item';
+    div.innerHTML=`
+      <span>${ci.name} x${ci.quantity} - ₹${ci.price*ci.quantity}</span>
+      <div>
+        <button onclick='changeQuantity("${ci.name}","${ci.vendor}",1)'>+</button>
+        <button onclick='changeQuantity("${ci.name}","${ci.vendor}",-1)'>-</button>
+        <button onclick='removeFromCart("${ci.name}","${ci.vendor}")'>Remove</button>
+      </div>
+    `;
+    cartDiv.appendChild(div);
+  });
+  document.getElementById('cartTotal').textContent = `Total: ₹${total}`;
+}
+
+// Checkout function
+function checkout(){
+  if(cart.length === 0){
+    alert('Your cart is empty!');
+    return;
+  }
+  // Group cart by vendor
+  const ordersByVendor = {};
+  cart.forEach(item => {
+    if(!ordersByVendor[item.vendor]){
+      ordersByVendor[item.vendor] = { vendorName: item.vendorName, items: [] };
+    }
+    ordersByVendor[item.vendor].items.push({
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      category: item.category,
+      vegType: item.vegType,
+      desc: item.desc
+    });
+  });
+
+  // Push orders to Firebase
+  const orderRef = db.ref('orders').push();
+  orderRef.set({
+    orderId: orderRef.key,
+    timestamp: Date.now(),
+    ordersByVendor: ordersByVendor,
+    total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  }).then(() => {
+    alert('Order placed successfully! Vendors will be notified.');
+    cart = []; // Clear cart
+    updateCartDisplay();
+  }).catch(error => {
+    console.error('Error placing order:', error);
+    alert('Error placing order. Please try again.');
+  });
+}
+</script>
+
+<!-- Additional Firebase module code -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfigModule = {  
+    apiKey: "AIzaSyBzICC4WWJbI6znrLfafWvg6vwdR_joRlI",
+    authDomain: "bruteforce96-433ed.firebaseapp.com",
+    projectId: "bruteforce96-433ed",
+    storageBucket: "bruteforce96-433ed.appspot.com",
+    messagingSenderId: "87702972088",
+    appId: "1:87702972088:web:2b5f391e7abb674d24764d",
+    measurementId: "G-3PCXV2KQFE"
+  };
+
+const appModule = initializeApp(firebaseConfigModule);
+const dbModule = getDatabase(appModule);
+
+const menuContainer = document.getElementById("menuContainer");
+const cartList = document.getElementById("cartList");
+
+// Load menu items from module
+const menuRef = ref(dbModule, "menuItems/");
+onValue(menuRef, (snapshot) => {
+  menuContainer.innerHTML = ""; // Clear old list
+  snapshot.forEach(child => {
+    const item = child.val();
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <p><b>${item.name}</b> - ₹${item.price}</p>
+      <button onclick='addToCartModule("${item.name}", ${item.price})'>Add to Cart</button>
+      <hr>
+    `;
+    menuContainer.appendChild(div);
+  });
+});
+
+// Add to Cart from module
+window.addToCartModule = function(name, price) {
+  const li = document.createElement("li");
+  li.textContent = `${name} - ₹${price}`;
+  cartList.appendChild(li);
+}
+</script>
+
+</body>
+</html>

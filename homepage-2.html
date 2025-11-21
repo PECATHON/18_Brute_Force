@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hungry Brain — Interactive Home Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+                url('https://media.istockphoto.com/id/1829241109/photo/enjoying-a-brunch-together.jpg?s=612x612&w=0&k=20&c=9awLLRMBLeiYsrXrkgzkoscVU_3RoVwl_HA-OT-srjQ=');
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            color: white;
+            text-align: center;
+        }
+
+        .container {
+            backdrop-filter: blur(12px);
+            padding: 50px;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            width: 80%;
+            max-width: 650px;
+            margin: auto;
+            margin-top: 150px;
+            animation: fadeIn 1.2s ease-in-out;
+        }
+
+        /* ⭐ Brand name style */
+        .brand {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            background-clip: text;
+            color: transparent;
+            text-transform: uppercase;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: 0.3s;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #feb47b, #ff7e5f);
+            transform: scale(1.05);
+        }
+
+        .box-section {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding-bottom: 40px;
+            animation: fadeIn 1.2s ease-in-out;
+        }
+
+        .box {
+            width: 250px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            transition: 0.3s;
+            text-align: center;
+            cursor: default;
+        }
+
+        .box:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.25);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="brand">Hungry Brain</div> <!-- ⭐ Brand Name Added -->
+        <h1>Where Hunger Meets Its Match</h1>
+        <a href="login.html" class="login-btn">Login / Sign-Up</a>
+    </div>
+
+    <div class="box-section">
+
+        <div class="box">
+            <h3>🍕 Fast Food</h3>
+            <p>Burgers, Pizza, Fries & more.</p>
+        </div>
+
+        <div class="box">
+            <h3>🍛 Indian Meals</h3>
+            <p>Authentic Desi flavors.</p>
+        </div>
+
+        <div class="box">
+            <h3>🍰 Desserts</h3>
+            <p>Cakes, sweets & ice creams.</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foody Portal — Login / Signup</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+:root{
+  --glass-bg: rgba(255,255,255,0.08);
+  --accent-pink: #ff2b6e;
+  --accent-cyan: #29d9ff;
+  --glass-border: rgba(255,255,255,0.14);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+
+body{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#0b0b11;
+  color:white;
+  overflow:hidden;
+  position:relative;
+}
+
+.foody-bg{
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(160deg, rgba(6,6,8,0.6), rgba(6,6,8,0.6)),
+    url("https://img.freepik.com/free-photo/top-view-circular-food-frame_23-2148723455.jpg");
+  background-size:cover;
+  background-position:center;
+  animation:floatBG 20s ease-in-out infinite;
+  z-index:0;
+}
+
+@keyframes floatBG{
+  0%{ transform:scale(1); }
+  50%{ transform:scale(1.03) translateY(-8px); }
+  100%{ transform:scale(1); }
+}
+
+.wrap{
+  width:420px;
+  padding:35px;
+  border-radius:18px;
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  backdrop-filter:blur(12px) saturate(120%);
+  box-shadow:0 10px 40px rgba(0,0,0,0.5);
+  position:relative;
+  z-index:2;
+}
+
+h2{text-align:center;font-size:24px;margin-bottom:10px;}
+
+.field{
+  margin:12px 0;
+}
+
+.field input, .field select{
+  width:100%;
+  padding:12px;
+  font-size:14px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.1);
+  color:white;
+  outline:none;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:14px;
+  border:none;
+  border-radius:10px;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  background:var(--accent-pink);
+  color:white;
+}
+
+button:hover{
+  opacity:0.9;
+  transform:scale(1.01);
+}
+
+.toggle-btn{
+  margin-top:14px;
+  text-align:center;
+  font-size:14px;
+  cursor:pointer;
+  color:var(--accent-cyan);
+}
+
+.error{
+  text-align:center;
+  margin-top:10px;
+  font-size:13px;
+  color:#ff8b8b;
+  min-height:18px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="foody-bg"></div>
+
+<div class="wrap">
+
+  <h2 id="form-title">Sign Up</h2>
+
+  <div id="username-field" class="field">
+    <input type="text" id="username" placeholder="Full Name">
+  </div>
+
+  <div class="field">
+    <input type="email" id="email" placeholder="Email">
+  </div>
+
+  <div class="field">
+    <input type="password" id="password" placeholder="Password">
+  </div>
+
+  <div id="role-field" class="field">
+    <select id="role">
+      <option value="" disabled selected>Select Role</option>
+      <option value="student">Student</option>
+      <option value="vendor">Vendor</option>
+      <option value="admin">Admin</option>
+    </select>
+  </div>
+
+  <button id="submit-btn">Sign Up</button>
+
+  <div id="toggle-btn" class="toggle-btn">Already have an account? Login</div>
+
+  <div id="error-msg" class="error"></div>
+
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBzICC4WWJbI6znrLfafWvg6vwdR_joRlI",
+  authDomain: "bruteforce96-433ed.firebaseapp.com",
+  projectId: "bruteforce96-433ed",
+  storageBucket: "bruteforce96-433ed.firebasestorage.app",
+  messagingSenderId: "87702972088",
+  appId: "1:87702972088:web:2b5f391e7abb674d24764d",
+  measurementId: "G-3PCXV2KQFE"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// DOM
+const formTitle = document.getElementById("form-title");
+const toggleBtn = document.getElementById("toggle-btn");
+const submitBtn = document.getElementById("submit-btn");
+const usernameField = document.getElementById("username-field");
+const roleField = document.getElementById("role-field");
+const errorMsg = document.getElementById("error-msg");
+
+let isLogin = false;
+
+// Toggle Login / Signup
+toggleBtn.addEventListener("click", () => {
+  isLogin = !isLogin;
+
+  if(isLogin){
+    formTitle.textContent = "Login";
+    submitBtn.textContent = "Login";
+    toggleBtn.textContent = "Don't have an account? Sign Up";
+
+    usernameField.style.display = "none";
+    roleField.style.display = "none";
+  } else {
+    formTitle.textContent = "Sign Up";
+    submitBtn.textContent = "Sign Up";
+    toggleBtn.textContent = "Already have an account? Login";
+
+    usernameField.style.display = "block";
+    roleField.style.display = "block";
+  }
+
+  errorMsg.textContent = "";
+});
+
+// Submit Button
+submitBtn.addEventListener("click", async () => {
+  const username = document.getElementById("username").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const role = document.getElementById("role").value;
+
+  errorMsg.textContent = "";
+
+  try {
+    if(isLogin){
+      const userCred = await auth.signInWithEmailAndPassword(email, password);
+      const userDoc = await db.collection("users").doc(userCred.user.uid).get();
+
+      const userRole = userDoc.data().role;
+
+      if(userRole === "student") window.location.href = "Student.html";
+      if(userRole === "vendor") window.location.href = "Vendor.html";
+      if(userRole === "admin") window.location.href = "Admin.html";
+      
+    } else {
+      if(!username || !role){
+        errorMsg.textContent = "Please fill all fields!";
+        return;
+      }
+
+      const userCred = await auth.createUserWithEmailAndPassword(email, password);
+
+      await db.collection("users").doc(userCred.user.uid).set({
+        username,
+        email,
+        role
+      });
+
+      alert("Account created successfully! Please login.");
+      toggleBtn.click();
+    }
+
+  } catch(err){
+    errorMsg.textContent = err.message;
+  }
+});
+
+</script>
+
+</body>
+</html>
