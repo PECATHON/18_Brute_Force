@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Vendor Dashboard — Foody</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+  :root{
+    --glass-bg: rgba(255,255,255,0.08);
+    --accent-pink: #ff2b6e;
+    --accent-cyan: #29d9ff;
+    --glass-border: rgba(255,255,255,0.14);
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; font-family:"Poppins",sans-serif; }
+
+  body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background-color:#0b0b11;
+    color:#fff;
+    position:relative;
+    overflow:auto;
+  }
+
+  .foody-bg{
+    position:fixed;
+    inset:0;
+    background-image:
+      linear-gradient(170deg, rgba(6,6,8,0.62), rgba(6,6,8,0.62)),
+      url("https://img.freepik.com/free-photo/top-view-circular-food-frame_23-2148723455.jpg");
+    background-size:cover;
+    background-position:center;
+    filter:saturate(1.05) contrast(1.02);
+    animation: slowFloat 18s ease-in-out infinite;
+    z-index:0;
+  }
+
+  @keyframes slowFloat{
+    0%{ transform:scale(1) translateY(0); }
+    50%{ transform:scale(1.02) translateY(-10px); }
+    100%{ transform:scale(1) translateY(0); }
+  }
+
+  .login-wrap{
+    width:520px;
+    max-width:92%;
+    padding:34px;
+    margin-top:30px;
+    border-radius:18px;
+    background:var(--glass-bg);
+    backdrop-filter:blur(12px) saturate(120%);
+    border:1px solid var(--glass-border);
+    box-shadow:0 10px 40px rgba(2,6,23,0.6);
+    position:relative;
+    z-index:2;
+    transition:.25s;
+  }
+
+  .header{text-align:center;margin-bottom:24px;}
+  .header h1{ font-size:22px;font-weight:600;margin-bottom:6px; }
+  .header p{ font-size:13px;opacity:0.85; }
+
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  .option-btn{
+    padding:16px;
+    border-radius:12px;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border);
+    color:#fff;
+    font-size:16px;
+    font-weight:500;
+    cursor:pointer;
+    text-align:center;
+    transition:.25s;
+  }
+
+  .option-btn:hover{
+    background:var(--accent-cyan);
+    color:#000;
+    transform:scale(1.02);
+  }
+
+  .msg{ margin-top:20px; text-align:center; font-size:13px; height:20px; }
+  .msg.success{ color:#9fffcb; }
+  .msg.error{ color:#ff8b8b; }
+
+  .upload-section{ display:none; margin-top:20px; }
+  .field{ margin:12px 0; }
+  .field label{ display:block; font-size:13px; margin-bottom:6px; }
+  .field input, .field textarea, select{
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.06);
+    color:#fff;
+    outline:none;
+    font-size:14px;
+  }
+  textarea{ resize:vertical; }
+  .veg-options{ display:flex; gap:15px; margin:8px 0 12px; font-size:14px; }
+  input[type="radio"]{ transform:scale(1.2); margin-right:4px; }
+  .actions{ display:flex; gap:12px; margin-top:14px; }
+  .btn{ flex:1; padding:12px; border-radius:10px; font-weight:600; cursor:pointer; border:none; font-size:15px; }
+  .add-btn{ background:var(--accent-cyan); color:#000; }
+  .finish-btn{ background:var(--accent-pink); color:#fff; }
+  .back-btn{ background:rgba(255,255,255,0.1); color:#fff; margin-top:10px; }
+  .menu-list{ margin-top:20px; padding:10px; border-radius:12px; background:rgba(255,255,255,0.05); max-height:300px; overflow-y:auto; }
+  .menu-item{ padding:10px; border-bottom:1px solid rgba(255,255,255,0.1); font-size:14px; display:flex; justify-content:space-between; align-items:center; }
+  .menu-item:last-child{ border-bottom:none; }
+  .remove-btn{ background:#ff8b8b; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:12px; }
+  .view-menu-section{ display:none; margin-top:20px; }
+</style>
+</head>
+<body>
+
+<div class="foody-bg"></div>
+
+<div class="login-wrap">
+  <div class="header">
+    <h1>Vendor Dashboard</h1>
+    <p>Select an option to manage your menu and orders.</p>
+  </div>
+
+  <div class="options" id="optionsSection">
+    <button class="option-btn" onclick="showUploadMenu()">Update Menu</button>
+    <button class="option-btn" onclick="showViewMenu()">View Menu</button>
+    <button class="option-btn" onclick="navigateTo('view-orders.html')">View Orders</button>
+  </div>
+
+  <div class="upload-section" id="uploadSection">
+    <div class="header">
+      <h1>Update Menu</h1>
+      <p>Enter each food item with details.</p>
+    </div>
+
+    <div class="field">
+      <label>Vendor Name</label>
+      <input type="text" id="vendorName" placeholder="e.g. John's Kitchen">
+    </div>
+
+    <div class="field">
+      <label>Food Category</label>
+      <select id="itemCategory">
+        <option value="">-- Select Category --</option>
+        <option>Burger</option>
+        <option>Pizza</option>
+        <option>Pasta</option>
+        <option>Beverages</option>
+        <option>Rolls</option>
+        <option>Mcains/Fried Snacks</option>
+        <option>Dessert</option>
+        <option>Maggie</option>
+        <option>Thali</option>
+        <option>South Indian</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Item Name</label>
+      <input type="text" id="itemName" placeholder="e.g. Veg Burger">
+    </div>
+
+    <div class="field">
+      <label>Veg / Non-Veg</label>
+      <div class="veg-options">
+        <label><input type="radio" name="vegType" value="Veg"> Veg</label>
+        <label><input type="radio" name="vegType" value="Non-Veg"> Non-Veg</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Price (₹)</label>
+      <input type="number" id="itemPrice" placeholder="e.g. 120">
+    </div>
+
+    <div class="field">
+      <label>Description</label>
+      <textarea id="itemDesc" rows="3" placeholder="Short details of dish"></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="btn add-btn" onclick="addItem()">Add Item</button>
+      <button class="btn finish-btn" onclick="finishMenu()">Finish & Submit</button>
+    </div>
+
+    <button class="btn back-btn" onclick="backToDashboard()">Back to Dashboard</button>
+
+    <div id="message" class="msg"></div>
+    <div id="menuList" class="menu-list" style="display:none;">
+      <h3>Added Items:</h3>
+    </div>
+  </div>
+
+  <div class="view-menu-section" id="viewMenuSection">
+    <div class="header">
+      <h1>View Menu</h1>
+      <p>Review and manage your menu items.</p>
+    </div>
+
+    <div id="viewMenuList" class="menu-list">
+      <h3>Your Menu Items:</h3>
+    </div>
+
+    <div id="noItemsMsg" class="msg" style="display:none;">No items in menu yet.</div>
+
+    <button class="btn back-btn" onclick="backToDashboard()">Back to Dashboard</button>
+  </div>
+
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBzICC4WWJbI6znrLfafWvg6vwdR_joRlI",
+    authDomain: "bruteforce96-433ed.firebaseapp.com",
+    projectId: "bruteforce96-433ed",
+    storageBucket: "bruteforce96-433ed.appspot.com",
+    messagingSenderId: "87702972088",
+    appId: "1:87702972088:web:2b5f391e7abb674d24764d",
+    measurementId: "G-3PCXV2KQFE"
+  };
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+let menuItems = [];
+let currentVendorId = '';
+let vendorNameValue = '';
+
+// Ensure vendor is logged in
+auth.onAuthStateChanged(user => {
+  if(user){
+    currentVendorId = user.uid;
+    loadVendorMenu();
+  } else {
+    alert('Please log in as vendor.');
+    window.location.href = 'login.html';
+  }
+});
+
+// Load existing menu from Firebase
+function loadVendorMenu(){
+  db.ref(`vendors/${currentVendorId}/menuItems`).on('value', snapshot => {
+    menuItems = snapshot.val() ? Object.values(snapshot.val()) : [];
+    updateMenuList();
+    updateViewMenuList();
+  });
+}
+
+function saveVendorMenu(){
+  const updates = {};
+  menuItems.forEach((item, index) => {
+    updates[index] = item;
+  });
+  db.ref(`vendors/${currentVendorId}/menuItems`).set(updates);
+}
+
+function showUploadMenu(){
+  document.getElementById('optionsSection').style.display = 'none';
+  document.getElementById('uploadSection').style.display = 'block';
+  updateMenuList();
+}
+
+function showViewMenu(){
+  document.getElementById('optionsSection').style.display = 'none';
+  document.getElementById('viewMenuSection').style.display = 'block';
+  updateViewMenuList();
+}
+
+function backToDashboard(){
+  document.getElementById('uploadSection').style.display = 'none';
+  document.getElementById('viewMenuSection').style.display = 'none';
+  document.getElementById('optionsSection').style.display = 'flex';
+  document.getElementById('message').textContent = '';
+}
+
+function navigateTo(page){
+  window.location.href = page;
+}
+
+function addItem(){
+  const vendorName = document.getElementById('vendorName').value;
+  const name = document.getElementById('itemName').value;
+  const price = document.getElementById('itemPrice').value;
+  const desc = document.getElementById('itemDesc').value;
+  const category = document.getElementById('itemCategory').value;
+  const vegType = document.querySelector('input[name="vegType"]:checked');
+
+  if(!vendorName || !name || !price || !desc || !category || !vegType){
+    document.getElementById('message').textContent = "⚠ Please fill all fields!";
+    document.getElementById('message').className = "msg error";
+    return;
+  }
+
+  const item = {vendorName, name, price, desc, category, vegType: vegType.value};
+  menuItems.push(item);
+  saveVendorMenu();
+
+  document.getElementById('message').textContent = "✔ Item added!";
+  document.getElementById('message').className = "msg success";
+  updateMenuList();
+
+  // Clear input fields
+  document.getElementById('itemName').value = "";
+  document.getElementById('itemPrice').value = "";
+  document.getElementById('itemDesc').value = "";
+  document.getElementById('itemCategory').value = "";
+  document.querySelectorAll('input[name="vegType"]').forEach(el => el.checked = false);
+}
+
+function updateMenuList(){
+  const list = document.getElementById('menuList');
+  list.innerHTML = '<h3>Added Items:</h3>';
+  if(menuItems.length > 0){
+    menuItems.forEach((item, index) => {
+      const itemDiv = document.createElement("div");
+      itemDiv.className = "menu-item";
+      itemDiv.innerHTML = `
+        <span>${item.vendorName} | ${item.category} | ${item.vegType} | ${item.name} — ₹${item.price}</span>
+        <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+      `;
+      list.appendChild(itemDiv);
+    });
+    list.style.display = "block";
+  } else {
+    list.style.display = "none";
+  }
+}
+
+function updateViewMenuList(){
+  const list = document.getElementById('viewMenuList');
+  const noItemsMsg = document.getElementById('noItemsMsg');
+  list.innerHTML = '<h3>Your Menu Items:</h3>';
+  if(menuItems.length > 0){
+    menuItems.forEach((item, index) => {
+      const itemDiv = document.createElement("div");
+      itemDiv.className = "menu-item";
+      itemDiv.innerHTML = `
+        <div>
+          <strong>${item.vendorName} | ${item.category} | ${item.vegType} | ${item.name}</strong><br>
+          Price: ₹${item.price}<br>
+          Description: ${item.desc}
+        </div>
+        <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+      `;
+      list.appendChild(itemDiv);
+    });
+    list.style.display = "block";
+    noItemsMsg.style.display = "none";
+  } else {
+    list.style.display = "none";
+    noItemsMsg.style.display = "block";
+  }
+}
+
+function removeItem(index){
+  menuItems.splice(index, 1);
+  saveVendorMenu();
+  updateMenuList();
+  updateViewMenuList();
+  document.getElementById('message').textContent = "✔ Item removed!";
+  document.getElementById('message').className = "msg success";
+}
+
+function finishMenu(){
+  if(menuItems.length === 0){
+    document.getElementById('message').textContent = "⚠ No items to submit!";
+    document.getElementById('message').className = "msg error";
+    return;
+  }
+  alert(`Total ${menuItems.length} items submitted!`);
+  backToDashboard();
+}
+</script>
+
+</body>
+</html>

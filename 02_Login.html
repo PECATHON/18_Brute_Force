@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foody Portal — Login / Signup</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  /* --- RESET & BODY --- */
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif;}
+  body{
+    height:100vh; display:flex; justify-content:center; align-items:center;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    overflow:hidden;
+  }
+
+  /* --- CONTAINER (GLASS EFFECT) --- */
+  .container{
+    width:420px; padding:50px; border-radius:25px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    text-align:center;
+    color:white;
+    transition: 0.5s ease;
+  }
+  .container:hover{
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    transform: translateY(-5px);
+  }
+
+  h2{
+    font-weight:600; font-size:2rem; margin-bottom:30px;
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+  }
+
+  /* --- INPUTS & SELECT --- */
+  input, select{
+    width:100%; padding:15px; margin:12px 0;
+    border-radius:15px; border:none;
+    outline:none; background: rgba(255,255,255,0.2);
+    color:white; font-size:1rem;
+    transition:0.3s;
+  }
+  input::placeholder { color:#f0f0f0; }
+  input:focus, select:focus { background: rgba(255,255,255,0.3); }
+
+  select{ cursor:pointer; }
+
+  /* --- BUTTON --- */
+  button{
+    width:100%; padding:15px; margin-top:20px;
+    border:none; border-radius:15px;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color:white; font-weight:600; font-size:1rem;
+    cursor:pointer; transition:0.3s;
+  }
+  button:hover{
+    background: linear-gradient(135deg, #feb47b, #ff7e5f);
+    transform: scale(1.03);
+    color:#333;
+  }
+
+  /* --- TOGGLE LINK --- */
+  .toggle-btn{
+    margin-top:20px; cursor:pointer;
+    text-decoration:underline; font-size:0.95rem;
+    color:white;
+    transition:0.3s;
+  }
+  .toggle-btn:hover{ color:#ffdd59; }
+
+  /* --- ERROR MSG --- */
+  .error{
+    color:#ff6b6b; margin-top:15px; font-weight:500;
+  }
+
+  /* --- ANIMATION --- */
+  @keyframes fadeIn{ from{opacity:0; transform: translateY(-50px);} to{opacity:1; transform: translateY(0);} }
+  .container{ animation: fadeIn 0.8s ease forwards; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2 id="form-title">Sign Up</h2>
+
+  <input type="text" id="username" placeholder="Username" required>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Password" required>
+
+  <select id="role" required>
+    <option value="" disabled selected>Select Role</option>
+    <option value="student">Student</option>
+    <option value="vendor">Vendor</option>
+    <option value="admin">Admin</option>
+  </select>
+
+  <button id="submit-btn">Sign Up</button>
+  <div class="toggle-btn" id="toggle-btn">Already have an account? Login</div>
+  <div class="error" id="error-msg"></div>
+</div>
+
+<!-- Firebase Scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // --- Firebase Config (replace with your keys) ---
+  const firebaseConfig = {
+  apiKey: "AIzaSyBzICC4WWJbI6znrLfafWvg6vwdR_joRlI",
+  authDomain: "bruteforce96-433ed.firebaseapp.com",
+  projectId: "bruteforce96-433ed",
+  storageBucket: "bruteforce96-433ed.firebasestorage.app",
+  messagingSenderId: "87702972088",
+  appId: "1:87702972088:web:2b5f391e7abb674d24764d",
+  measurementId: "G-3PCXV2KQFE"
+};
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // --- DOM Elements ---
+  const formTitle = document.getElementById('form-title');
+  const toggleBtn = document.getElementById('toggle-btn');
+  const submitBtn = document.getElementById('submit-btn');
+  const errorMsg = document.getElementById('error-msg');
+  let isLogin = false;
+
+  // --- Toggle Signup/Login ---
+  toggleBtn.addEventListener('click', () => {
+    isLogin = !isLogin;
+    if(isLogin){
+      formTitle.textContent = "Login";
+      submitBtn.textContent = "Login";
+      toggleBtn.textContent = "Don't have an account? Sign Up";
+      document.getElementById('username').style.display='none';
+      document.getElementById('role').style.display='none';
+    } else {
+      formTitle.textContent = "Sign Up";
+      submitBtn.textContent = "Sign Up";
+      toggleBtn.textContent = "Already have an account? Login";
+      document.getElementById('username').style.display='block';
+      document.getElementById('role').style.display='block';
+    }
+    errorMsg.textContent='';
+  });
+
+  // --- Signup/Login Function ---
+  submitBtn.addEventListener('click', async () => {
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const role = document.getElementById('role').value;
+
+    errorMsg.textContent='';
+
+    try {
+      if(isLogin){
+        const userCredential = await auth.signInWithEmailAndPassword(email,password);
+        const userDoc = await db.collection('users').doc(userCredential.user.uid).get();
+        const userRole = userDoc.data().role;
+
+        if(userRole==='student') window.location.href='Student.html';
+        else if(userRole==='vendor') window.location.href='Vendor.html';
+        else if(userRole==='admin') window.location.href='Admin.html';
+        else errorMsg.textContent='Role not found!';
+      } else {
+        if(!username || !role){ errorMsg.textContent='Enter all fields!'; return; }
+        const userCredential = await auth.createUserWithEmailAndPassword(email,password);
+        await db.collection('users').doc(userCredential.user.uid).set({
+          username: username,
+          email: email,
+          role: role
+        });
+        alert('Account created! Please login.');
+        toggleBtn.click();
+      }
+    } catch(error){
+      errorMsg.textContent = error.message;
+    }
+  });
+</script>
+
+</body>
+</html>
